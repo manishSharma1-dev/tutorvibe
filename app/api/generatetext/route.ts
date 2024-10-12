@@ -1,73 +1,59 @@
 import { ApiError } from "next/dist/server/api-utils"
-import {  convertToCoreMessages,streamText } from "ai";
-import { createGoogleGenerativeAI, google } from "@ai-sdk/google";
-
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(request: Request){
    try {
-     const { query }  = await request.json()
 
-     console.log("query we have recieved",query)
+     const data  = await request.json()
  
-     if(!query || query.lenght === 0 ) throw new Error("Invalid Query")
+     if(!data || data.lenght === 0 ) throw new Error("Invalid Query")
  
-         // in this step maybe i willl pass this query to the search api and get some respomse form the api  and we called it result 
+         // in this step maybe i willl pass this prompt to the search api and get some respomse form the api  and we called it result 
  
-         const data =  await Search_web(query)
+        const frontend_data_received =  await Search_web(data)
 
-         if(!data || data.lenght === 0 )throw new Error("Google console response -failed")
+        if(!frontend_data_received || frontend_data_received.lenght === 0 )throw new Error("Google console response -failed")
 
-         console.log("Google console result -sucess")
-        //  return Response.json(
-        //     {
-        //         sucess : true,
-        //         message  : `Data fetched Successfully : ${data}`
-        //     },
-        //     {
-        //         status : 200
-        //     }
-        //  )
-
+        console.log("Google console result -sucess")
  
-         // now in this steps we extract some response from the result that we get
+        // now in this steps we extract some response from the result that we get
  
-         const context = await extract_web_result(data?.items)
+        const context = await extract_web_result(frontend_data_received?.items)
 
-         if(!context || context.length === 0) throw new Error("Context exraction faield")
+        if(!context || context.length === 0) throw new Error("Context exraction faield")
 
-          console.log("Context Data -success")
+        console.log("Context Data -success")
 
-        //  return Response.json(
-        //     {
-        //         sucess : true,
-        //         message  : `Context fetched Successfully : ${context}`
-        //     },
-        //     {
-        //         status : 200
-        //     }
-        //  )
-         
-         // Now when i have the context text , as well as the query, then i will now pass it to function to generate some actual reponse from the api 
+        // now passing the result tot the gpt 
 
- 
-         const actual_result : any  = await responsefrom_the_gpt(data,context)
+        const apikey : any  = process.env.GOOGLE_GENERATIVE_AI_API_KEY
 
-         if(!actual_result || actual_result.length === 0) {
-            throw new ApiError(400,"Gemini reponse -failed")
-         }
+        const genAI = new GoogleGenerativeAI(apikey);
 
-         console.log("acttual_result",actual_result)
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+        const all_data = `${data}and ${context}`
+
+        const result = await model.generateContent(all_data);
+
+        if(!result){
+            throw new ApiError(500,"reponse genration failed")
+        }
+
+        const actual_response = await result.response.text()
+
+        console.log("reponse that will be send to the frontend", actual_response)
 
         return Response.json(
             {
-                sucess : true,
-                message  : "Gpt Response - success",
-                data : actual_result
+                success  :true,
+                message  : " gpt reponse fetched -success",
+                data  : actual_response
             },
             {
-                status : 200
+                status  : 200
             }
-        ) 
+        )
 
    } catch (error) {
      console.error("Text generation -failed",error)
@@ -136,49 +122,3 @@ async function extract_web_result(data:any) {
     }
 }
 
-async function responsefrom_the_gpt(data:any,context : any) {
-    try {
-
-        if(!data && !context) throw new ApiError(400,"text -issue, Not present")
-    
-        if (data.length === 0 && context.length === 0 ) throw new ApiError(400,"text -issue, Invalid tezt")
-
-        const apikey : any = process.env.GOOGLE_GENERATIVE_AI_API_KEY
-
-        const genai = createGoogleGenerativeAI(apikey)
-
-        const model = google("gemini-1.5-flash") //gemini-1.5-pro-latest
-
-        console.log("model choose successfully") 
-
-        const alldata : any = `${data} ${context}`
-
-        const messages : any = [
-           {role : "user", content:alldata}
-        ]
-
-        const response = await streamText({
-            model : model,
-            messages : messages
-        })
-
-        if (!response) {
-            throw new ApiError(500, "Response does not generate by the backend Gemini API");
-        }
-
-        // for await (const textPart of response.textStream) {
-        //     console.log("DAtA GENERATED BY THE GEMINI API : ",textPart);
-        // }
-        
-        return response.textStream
-
-        
-    } catch (error) {
-        console.error("GPt Reposne generation -failed",error)
-
-        return new ApiError(
-            500,
-            `GPT -respose generation -failed : ${error}`
-        )
-    }
-}
