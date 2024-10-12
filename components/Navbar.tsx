@@ -1,16 +1,19 @@
-import logo from "@/public/github_profile.png"
-import Image from "next/image"
+import { MessageSquareQuoteIcon } from "lucide-react"
+import Link from "next/link"
 
 export default function Navbar () {
   return (
     <div className="pl-10 pr-10 my-6">
-      <div className="p-1 border-black border-2 rounded-2xl">
+      <div className="p-1 ">
         <div className="flex items-center justify-between px-3 py-1">
-          <Image src={logo} alt="Logo" className="w-8 aspect-auto rounded-[50%] border-2 border-orange-500" />
+          <div className="flex items-center gap-1 font-semibold text-sm">
+            <p><MessageSquareQuoteIcon size={16}/></p>
+            <p className="">Tutorvibe</p>
+          </div>
+
           <ul className="flex items-center gap-8 text-sm">
             <li>About</li>
-            <li>let's start</li>
-            <li className="bg-black shadow-md shadow-zinc-400 drop-shadow-lg rounded-md text-white px-2 py-1">Sign In</li>
+            <li className="cursor-pointer hover:bg-yellow-200 p-1 rounded hover:underline underline-offset-4"><Link href={'/dashboard'}>let's start</Link></li>
           </ul>
         </div>
       </div>
