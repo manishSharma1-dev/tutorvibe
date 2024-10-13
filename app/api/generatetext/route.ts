@@ -42,8 +42,6 @@ export async function POST(request: Request){
 
         const actual_response = await result.response.text()
 
-        console.log("reponse that will be send to the frontend", actual_response)
-
         return Response.json(
             {
                 success  :true,

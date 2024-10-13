@@ -1,11 +1,12 @@
 "use client"
 
+import Markdown from '@/components/Markdown'
 import { ApiError } from 'next/dist/server/api-utils'
 import React, { FormEvent, useState } from 'react'
 
 export default function page() {
     const [data,setData] = useState([])
-    const [message,setMessage] = useState()
+    const [message,setMessage] = useState('')
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>){
         e.preventDefault(); 
@@ -29,9 +30,10 @@ export default function page() {
 
         const result = await response.json()
 
-        console.log('Result : ',result.data)
+        // console.log('Result : ',result.data)
+        console.log(' Result type : ', typeof(result.data))
 
-        setMessage(result)
+        setMessage(result?.data)
     }
 
   return (
@@ -49,8 +51,8 @@ export default function page() {
                         <button type='submit' className='text-xl cursor-pointer text-center'>+</button>
                     </div>
                 </form>
-                <div className='border border-black mt-1 min-h-[35rem] max-h-screen h-auto rounded-md px-2 '>
-                content willl be generated here
+                <div className='border overflow-hidden  border-black mt-1 min-h-[35rem] max-h-screen h-auto rounded-md px-2 '>
+                 <Markdown text={message} />
                 </div>
             </div>
 
