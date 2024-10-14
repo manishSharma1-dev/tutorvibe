@@ -14,15 +14,17 @@ export async function POST(request: Request){
 
         if(!frontend_data_received || frontend_data_received.lenght === 0 )throw new Error("Google console response -failed")
 
-        console.log("Google console result -sucess")
+        // console.log("Google console result -sucess",frontend_data_received?.items)
  
         // now in this steps we extract some response from the result that we get
  
-        const context = await extract_web_result(frontend_data_received?.items)
+        const {context_value,pageMetadata} = await extract_web_result(frontend_data_received?.items)
 
-        if(!context || context.length === 0) throw new Error("Context exraction faield")
+        if(!context_value || context_value.length === 0) throw new Error("Context exraction faield")
 
         console.log("Context Data -success")
+        console.log("LinkArray Data -success")
+        console.log("Pageimage Data -success")
 
         // now passing the result tot the gpt 
 
@@ -32,7 +34,7 @@ export async function POST(request: Request){
 
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        const all_data = `${data}and ${context}`
+        const all_data = `${data}and ${context_value}`
 
         const result = await model.generateContent(all_data);
 
@@ -46,7 +48,8 @@ export async function POST(request: Request){
             {
                 success  :true,
                 message  : " gpt reponse fetched -success",
-                data  : actual_response
+                data  : actual_response,
+                pageMetadata  :pageMetadata
             },
             {
                 status  : 200
@@ -96,20 +99,35 @@ async function extract_web_result(data:any) {
     try {
         if(!data || data.length === 0) throw new Error("result_text Issue ( invalid text / text not present )")
 
+            // const linksArray = data.map((links : any, index  :any ) => {
+            //     if(!links?.formattedUrl){
+            //         return null
+            //     }
+
+            //     return links?.formattedUrl
+            // })
+
+            const pageMetadata = data.map((image : any ,index : any ) => {
+                if(!image?.pagemap){
+                    return null
+                }
+
+                return image?.pagemap
+            })
+
             const context_value = data.reduce((acc  :any, result  :any ) => {
                 if (result?.snippet) {
                     return acc + ' ' + result.snippet;
-                } else if (result?.title) {
-                    return acc + ' ' + result.title;
+                } else {
+                    return acc;
                 }
-                return acc;
             }, '').trim();
 
             if(context_value.length === 0) throw new ApiError(500,"failed -context extraction")
 
             console.log("Context data fetched successfully : ")
 
-        return context_value
+        return {context_value,pageMetadata}
 
     } catch (error) {
         console.error("Extracting text from reasult -failed",error)
