@@ -1,0 +1,76 @@
+/* General Markdown container styling */
+.markdown-content {
+  font-family: Arial, sans-serif;
+  line-height: 2;
+  color: #333;
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+/* Heading styles */
+.markdown-content h1 {
+  font-size: 2rem;
+  color: #1a73e8;
+  margin-bottom: 10px;
+}
+
+.markdown-content h2 {
+  font-size: 1.75rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.markdown-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+/* Paragraphs */
+.markdown-content p {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+/* Lists */
+.markdown-content ul,
+.markdown-content ol {
+  padding-left: 20px;
+}
+
+.markdown-content li {
+  margin-bottom: 5px;
+}
+
+/* Bold and Italic */
+.markdown-content strong {
+  font-weight: bold;
+}
+
+.markdown-content em {
+  font-style: italic;
+}
+
+/* Blockquote */
+.markdown-content blockquote {
+  border-left: 5px solid #ddd;
+  padding-left: 10px;
+  color: #666;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Code blocks */
+.markdown-content pre {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+
+.markdown-content code {
+  background-color: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}

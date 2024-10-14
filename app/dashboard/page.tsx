@@ -74,8 +74,8 @@ export default function page() {
     }
 
   return (
-    <div className='p-1 min-h-screen'>
-        <h1 className='font-semibold font-[] text-xl pl-12 pt-3 '>Get Best peice of content for your topics.</h1>
+    <div className='p-1 min-h-screen gridlinesdesign'>
+        <h1 className='font-[20px]font-[] text-xl pl-12 pt-3 '>Get Best peice of content for your <span className='bg-yellow-200 p-1'>topics</span>.</h1>
         <div className='flex gap-5 justify-between pl-12 pr-12 pt-5'>
 
             <div className='w-[50%]'>
@@ -85,7 +85,7 @@ export default function page() {
                             const props  : any = e.target.value
                             setData(props)
                         }} className=' bg-black pl-3 pr-3 py-[6px] w-[100%] focus:outline-none placeholder:text-white  text-sm ' />
-                        <button type='submit' className='pl-3 pr-3 text-xl cursor-pointer text-center'>{isLoading === true ? <Loader2 size={14} className='animate-spin' /> : <Send size={14} />}</button>
+                        <button type='submit' className='pl-3 pr-3 text-xl cursor-pointer text-center focus:outline-none'>{isLoading === true ? <Loader2 size={14} className='animate-spin' /> : <Send size={14} />}</button>
                     </div>
                 </form>
                 <div className='border overflow-y-auto scrollbar-hide border-black mt-1 min-h-[40rem] max-h-screen h-auto rounded-md px-2 '>
@@ -98,19 +98,19 @@ export default function page() {
             <div className='w-[50%] h-[100%]'>
                 <div className='flex flex-col gap-1'>
                     <div className='min-h-[42rem] max-h-screen overflow-y-auto overflow-x-hidden h-auto border border-black rounded-md pt-4 pl-5 pr-20 pb-2'>
-                        <p className='underline underline-offset-4 bg-yellow-300 text-lg inline mb-4'>Data from these sources ...</p>
+                        <p className='underline underline-offset-4 bg-yellow-200 text-lg inline mb-4'>Data from these sources ...</p>
                          {isLoading === true ? ( <div className='mt-3'><SkeletonCard /></div>) : ( <> {Array.isArray(sourceLink) &&  sourceLink.map((metadata : any , index : any) => ( 
                             <div className='p-1 ' key={index}>
 
                                 {Array.isArray(metadata?.metatags) && metadata.metatags.map((link  :any,index : any ) => (
 
-                                        <ol key={index} className='flex flex-wrap flex-col gap-10'>
-                                            <li className='flex gap-6'>
+                                        <div key={index} className='flex flex-wrap flex-col  gap-10'>
+                                            <div className='flex justify-evenly gap-6'>
                                                 { link["og:image"] ? <img src={link["og:image"]} alt={link["og:title"]} width={140} height={120} className='rounded-md max-h-[80px] max-w-[90px] shadow shadow-neutral-300 ' ></img> : '' }
 
                                                 {link["og:image"] && link["og:title"] ? <p>{reducetext(link["og:title"],70)}</p> : ''}
-                                            </li>
-                                        </ol>
+                                            </div>
+                                        </div>
 
                                 ))}
                                 
