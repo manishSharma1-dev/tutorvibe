@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Send } from 'lucide-react'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function page() {
     const [data,setData] = useState([])
@@ -39,8 +38,6 @@ export default function page() {
     
             const result = await response.json()
     
-            // console.log(' Result data type : ', typeof(result.data))
-            // console.log(' Result links type : ', typeof(result.Links))
             console.log(' Result page image : ', result.pageMetadata)
     
             setMessage(result?.data)
@@ -84,7 +81,7 @@ export default function page() {
                         <input type="text" placeholder='Enter text' value={data} onChange={(e) =>{
                             const props  : any = e.target.value
                             setData(props)
-                        }} className=' bg-black pl-3 pr-3 py-[6px] w-[100%] focus:outline-none placeholder:text-white  text-sm ' />
+                        }} className=' bg-black pt-2  pb-2 pl-3 pr-3 w-[100%] focus:outline-none placeholder:text-white  text-sm ' />
                         <button type='submit' className='pl-3 pr-3 text-xl cursor-pointer text-center focus:outline-none'>{isLoading === true ? <Loader2 size={14} className='animate-spin' /> : <Send size={14} />}</button>
                     </div>
                 </form>
@@ -97,26 +94,25 @@ export default function page() {
 
             <div className='w-[50%] h-[100%]'>
                 <div className='flex flex-col gap-1'>
-                    <div className='min-h-[42rem] max-h-screen overflow-y-auto overflow-x-hidden h-auto border border-black rounded-md pt-4 pl-5 pr-20 pb-2'>
-                        <p className='underline underline-offset-4 bg-yellow-200 text-lg inline mb-4'>Data from these sources ...</p>
-                         {isLoading === true ? ( <div className='mt-3'><SkeletonCard /></div>) : ( <> {Array.isArray(sourceLink) &&  sourceLink.map((metadata : any , index : any) => ( 
-                            <div className='p-1 ' key={index}>
+                    <div className='min-h-[42.5rem] max-h-screen overflow-y-auto overflow-x-hidden h-auto border border-black rounded-md pt-4 pl-5 pr-20 pb-2'>
+                        <p className='underline underline-offset-4 bg-yellow-200 text-lg inline p-2'>Some useful resources ...</p>
+                         {isLoading === true ? ( <div className='mt-4'><SkeletonCard /></div>) : ( <div className='flex flex-wrap flex-col mt-5 gap-4'> {Array.isArray(sourceLink) &&  sourceLink.map((metadata : any , index : any) => ( 
+                            <div key={index}>
 
                                 {Array.isArray(metadata?.metatags) && metadata.metatags.map((link  :any,index : any ) => (
 
-                                        <div key={index} className='flex flex-wrap flex-col  gap-10'>
-                                            <div className='flex justify-evenly gap-6'>
-                                                { link["og:image"] ? <img src={link["og:image"]} alt={link["og:title"]} width={140} height={120} className='rounded-md max-h-[80px] max-w-[90px] shadow shadow-neutral-300 ' ></img> : '' }
+                                        <div key={index}>
+                                            <div className='flex gap-6'>
+                                                { link["og:image"] && link["og:title"] ?  <Link href={`${link["og:url"]}`}> <img src={link["og:image"]} alt={link["og:title"]} width={140} height={130} className='rounded-md max-h-[80px] max-w-[90px] shadow shadow-neutral-300 object-cover' ></img> </Link> : '' }
 
-                                                {link["og:image"] && link["og:title"] ? <p>{reducetext(link["og:title"],70)}</p> : ''}
+                                                {link["og:image"] && link["og:title"] ? <p><Link href={`${link["og:url"]}`}>{reducetext(link["og:title"],70)}</Link></p> : ''}
                                             </div>
                                         </div>
 
                                 ))}
                                 
-
                             </div>
-                         ))} </> ) }
+                         ))} </div> ) }
                     </div>
                 </div>
             </div>
@@ -125,3 +121,5 @@ export default function page() {
     </div>
   )
 }
+
+{/* <> <div className='bg-black text-white shadow shadow-neutral-300 w-50 h-20 rounded-md flex justify-center items-center text-sm'><p>Image not present.</p></div></> */}
