@@ -1,5 +1,8 @@
 import { ApiError } from "next/dist/server/api-utils"
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import NodeCache from "node-cache"
+
+const myCache = new NodeCache();
 
 export async function POST(request: Request){
    try {
@@ -9,16 +12,35 @@ export async function POST(request: Request){
      if(!data || data.lenght === 0 ) throw new Error("Invalid Query")
  
          // in this step maybe i willl pass this prompt to the search api and get some respomse form the api  and we called it result 
+
+        const cacheKey = JSON.stringify(data); // making a cache key
+
+        const cachedResult = myCache.get(cacheKey); // checking if data is already present
+
+        if(cachedResult){
+            return Response.json(
+                {
+                    success : true,
+                    message : "web_search data is already in the cache",
+                    data  : cachedResult
+                },
+                {
+                    status : 200
+                }
+            )
+        }
  
         const frontend_data_received =  await Search_web(data)
 
-        if(!frontend_data_received || frontend_data_received.lenght === 0 )throw new Error("Google console response -failed")
+        if(!frontend_data_received || frontend_data_received.lenght === 0 ) throw new Error("Google console response -failed")
  
         // now in this steps we extract some response from the result that we get
  
         const { pageMetadata } = await extract_web_result(frontend_data_received?.items)
 
         if(!pageMetadata || pageMetadata.length === 0) throw new Error("Context exraction faield")
+
+        myCache.set(cacheKey, pageMetadata, 3600); // Setting the result in the cache 
 
         console.log("Pageimage Data -success")
 
