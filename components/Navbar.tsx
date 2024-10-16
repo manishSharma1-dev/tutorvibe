@@ -1,5 +1,6 @@
-import { MessageSquareQuoteIcon } from "lucide-react"
+import Logo from "@/public/logo.png"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function Navbar () {
   return (
@@ -7,7 +8,7 @@ export default function Navbar () {
       <div className="p-1 ">
         <div className="flex items-center justify-between px-3 py-1">
           <div className="flex items-center gap-1 font-semibold text-sm">
-            <p><MessageSquareQuoteIcon size={16}/></p>
+            <Image src={Logo} alt='Logo' className="w-5"></Image>
             <p className="">Tutorvibe</p>
           </div>
 

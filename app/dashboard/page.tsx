@@ -34,11 +34,7 @@ export default function page() {
                 )
             }
     
-            console.log("Reponse from the backend : ", response)
-    
             const result = await response.json()
-    
-            console.log(' Result page image : ', result.pageMetadata)
     
             setMessage(result?.data)
             setSourceLinks(result?.pageMetadata)

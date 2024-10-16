@@ -2,7 +2,12 @@ import { ApiError } from "next/dist/server/api-utils"
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import NodeCache from "node-cache"
 
-const myCache = new NodeCache();
+const myCache = new NodeCache(); // node cache instance 
+
+interface cachedData {
+    actual_response : any;
+    pageMetadata  :any;
+}
 
 export async function POST(request: Request){
    try {
@@ -13,66 +18,72 @@ export async function POST(request: Request){
  
          // in this step maybe i willl pass this prompt to the search api and get some respomse form the api  and we called it result 
 
-        const cacheKey = JSON.stringify(data); // making a cache key
+        const cacheKey = JSON.stringify(data); // key for storing data 
 
-        const cachedResult = myCache.get(cacheKey); // checking if data is already present
+        const cachedData  = myCache.get<cachedData>(cacheKey) //Storing the cache result
+        console.log("cached Data : ")
 
-        if(cachedResult){
+        if(cachedData ){
+            console.log("Data found in the cached Result")
+
             return Response.json(
                 {
                     success : true,
-                    message : "web_search data is already in the cache",
-                    data  : cachedResult
+                    messgae : "Data found in the Cached result",
+                    data  : cachedData.actual_response, 
+                    pageMetadata  :cachedData.pageMetadata
                 },
                 {
                     status : 200
                 }
             )
-        }
- 
-        const frontend_data_received =  await Search_web(data)
+        } else {
 
-        if(!frontend_data_received || frontend_data_received.lenght === 0 ) throw new Error("Google console response -failed")
- 
-        // now in this steps we extract some response from the result that we get
- 
-        const { pageMetadata } = await extract_web_result(frontend_data_received?.items)
+            const frontend_data_received =  await Search_web(data)
 
-        if(!pageMetadata || pageMetadata.length === 0) throw new Error("Context exraction faield")
-
-        myCache.set(cacheKey, pageMetadata, 3600); // Setting the result in the cache 
-
-        console.log("Pageimage Data -success")
-
-        // now passing the result tot the gpt 
-
-        const apikey : any  = process.env.GOOGLE_GENERATIVE_AI_API_KEY
-
-        const genAI = await new GoogleGenerativeAI(apikey);
-
-        const model = await genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const all_data = data
-
-        const result = await model.generateContent(all_data);
-
-        if(!result){
-            throw new ApiError(500,"reponse genration failed")
-        }
-
-        const actual_response = await result.response.text()
-
-        return Response.json(
-            {
-                success  :true,
-                message  : " gpt reponse fetched -success",
-                data  : actual_response,
-                pageMetadata  :pageMetadata
-            },
-            {
-                status  : 200
+            if(!frontend_data_received || frontend_data_received.lenght === 0 ) throw new Error("Google console response -failed")
+     
+            // now in this steps we extract some response from the result that we get
+     
+            const { pageMetadata } = await extract_web_result(frontend_data_received?.items)
+    
+            if(!pageMetadata || pageMetadata.length === 0) throw new Error("Context exraction faield")
+    
+            console.log("Pageimage Data -success")
+    
+            // now passing the result tot the gpt 
+    
+            const apikey : any  = process.env.GOOGLE_GENERATIVE_AI_API_KEY
+    
+            const genAI = await new GoogleGenerativeAI(apikey);
+    
+            const model = await genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+            const all_data = data
+    
+            const result = await model.generateContent(all_data);
+    
+            if(!result){
+                throw new ApiError(500,"reponse genration failed")
             }
-        )
+    
+            const actual_response = await result.response.text()
+
+            myCache.set(cacheKey,{actual_response,pageMetadata},3600) //setting cache data here 
+    
+            return Response.json(
+                {
+                    success  :true,
+                    message  : " gpt reponse fetched -success",
+                    data  : actual_response, // gemini response
+                    pageMetadata  :pageMetadata // google websearch response
+                },
+                {
+                    status  : 200
+                }
+            )
+
+        }
 
    } catch (error) {
      console.error("Text generation -failed",error)
@@ -86,6 +97,7 @@ export async function POST(request: Request){
 async function Search_web(text:string) : Promise<any> {
     try {
         console.log("text we recived from the frontend : ",text)
+
         if(!text && text.length === 0) throw new Error("Text Issue ( invalid text / text not present )")
 
             const response = await fetch(`https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_SEARCH_API_KEY}&cx=${process.env.GOOGLE_SEARCH_ENGINE_ID}&q=${text}`)
