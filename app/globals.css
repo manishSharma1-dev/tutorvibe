@@ -13,9 +13,9 @@
     scrollbar-width: none; /* Firefox */
   }
   
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none; /* Safari and Chrome */
-  }
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
   
   @layer base {
   :root {
@@ -82,7 +82,7 @@
     }
 }
 
-
+/* 
 .gridlinesdesign{
   position: relative;
   background-image:linear-gradient(#000 1px, transparent 1px),
@@ -107,6 +107,17 @@
 .gridlinesdesign > * {
   position: relative;
   z-index: 1;
+} */
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
 }
 
   

@@ -4,28 +4,44 @@ import Markdown from '@/components/Markdown'
 import { ApiError } from 'next/dist/server/api-utils'
 import React, { FormEvent, useState } from 'react'
 import { Skeleton } from "@/components/ui/skeleton"
-import { Send } from 'lucide-react'
-import { Loader2 } from 'lucide-react'
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { Send,Loader2,LucideCopyPlus } from 'lucide-react'
 import Link from 'next/link'
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+  } from "@/components/ui/select"
 
 export default function page() {
-    const [data,setData] = useState([])
+    const [data,setData] = useState('')
     const [message,setMessage] = useState('')
     const [isLoading,setisLoading] = useState(false)
     const [sourceLink,setSourceLinks] = useState([])
+    const [showImage,setShowImage] = useState(false)
+    const [showquestion,setShowQuestion] = useState(false)
+    const [question,setQuestion] = useState('') // for showing the question that i searched
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>){
        try {
             e.preventDefault(); 
             setisLoading(true)
+            setShowQuestion(true)
+            setQuestion(data)
     
-            const response = await fetch('http://localhost:3000/api/generatetext', {
+            const response = await fetch('/api/generatetext', {
                 method : 'POST',
                 headers : {
                     'Content-Type': 'application/json'
                 },
                 body : JSON.stringify(data)
             })
+
+            setData('')
     
             if(!response.ok){
                 throw new ApiError(
@@ -35,6 +51,8 @@ export default function page() {
             }
     
             const result = await response.json()
+
+            console.log(`result Data: `,result)
     
             setMessage(result?.data)
             setSourceLinks(result?.pageMetadata)
@@ -67,55 +85,101 @@ export default function page() {
     }
 
   return (
-    <div className='p-1 min-h-screen gridlinesdesign'>
-        <h1 className='font-[20px]font-[] text-xl pl-12 pt-3 '>Get Best peice of content for your <span className='bg-yellow-200 p-1'>topics</span>.</h1>
-        <div className='flex gap-5 justify-between pl-12 pr-12 pt-5'>
-
-            <div className='w-[50%]'>
-                <form onSubmit={handleSubmit}>
-                    <div className=' flex  items-center gap-2 bg-black text-white shadow shadow-neutral-400 rounded-lg px-2'>
-                        <input type="text" placeholder='Enter text' value={data} onChange={(e) =>{
-                            const props  : any = e.target.value
-                            setData(props)
-                        }} className=' bg-black pt-2  pb-2 pl-3 pr-3 w-[100%] focus:outline-none placeholder:text-white  text-sm ' />
-                        <button type='submit' className='pl-3 pr-3 text-xl cursor-pointer text-center focus:outline-none'>{isLoading === true ? <Loader2 size={14} className='animate-spin' /> : <Send size={14} />}</button>
-                    </div>
-                </form>
-                <div className='border overflow-y-auto scrollbar-hide border-black mt-1 min-h-[40rem] max-h-screen h-auto rounded-md px-2 '>
-                    <div className='pt-4 pl-3 pr-3 pb-2'>
-                        {isLoading === true?<SkeletonCard /> : <Markdown text={message} />}
-                    </div>
+    <div className='flex justify-center bg-black'>
+        <div className=' text-white min-h-screen w-[50%]'>
+             {/* search bar  */}
+            <div className='py-2'>
+                <p className='text-center py-2 text-sm text-neutral-600'>Ask Your Academic Doubts 📒!</p>
+                <div className='bg-neutral-900 py-2 px-6 rounded-full '>
+                    <form onSubmit={handleSubmit}>
+                        <div className='flex gap-2'>
+                            <Select>
+                                <SelectTrigger className="w-[100px] h-7 text-xs border-none focus:outline-none">
+                                    <SelectValue placeholder="Default" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                    <SelectLabel />
+                                    <SelectItem value="default">Default</SelectItem>
+                                    <SelectItem value="highschool">High School</SelectItem>
+                                    <SelectItem value="graduate">Graduate</SelectItem>
+                                    <SelectItem value="research">Research</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                            <div className='flex w-full items-center gap-3'>
+                                <input 
+                                type="text" 
+                                placeholder='Ask ?' 
+                                value={data}
+                                onChange={(e) => setData(e.target.value)}
+                                className='text-xs text-white w-full bg-neutral-900 focus:outline-none' 
+                                />
+                                <button type='submit' className='px-2 cursor-pointer text-center focus:outline-none'>{isLoading === true ? <Loader2 size={14} className='opacity-60 size-4 cursor-pointer animate-spin' /> : <Send size={14} className='size-4 cursor-pointer' />}</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <div className='w-[50%] h-[100%]'>
-                <div className='flex flex-col gap-1'>
-                    <div className='min-h-[42.5rem] max-h-screen overflow-y-auto overflow-x-hidden h-auto border border-black rounded-md pt-4 pl-5 pr-20 pb-2'>
-                        <p className='underline underline-offset-4 bg-yellow-200 text-lg inline p-2'>Some useful resources ...</p>
-                         {isLoading === true ? ( <div className='mt-4'><SkeletonCard /></div>) : ( <div className='flex flex-wrap flex-col mt-5 gap-4'> {Array.isArray(sourceLink) &&  sourceLink.map((metadata : any , index : any) => ( 
-                            <div key={index}>
+            <div className='overflow-y-auto scrollbar-hide h-auto max-h-screen'>
+            {showquestion ? 
+            <div className='py-2'>
+                <div className='px-2 py-1'> 
+                    <p className='text-sm bg-neutral-800 px-6 py-1 rounded'>{question}</p>
+                </div>
 
-                                {Array.isArray(metadata?.metatags) && metadata.metatags.map((link  :any,index : any ) => (
+                <div className='px-3 py-1'>
+                    {showImage ? 
+                    <div className='flex flex-col gap-1'>
+                        <LucideCopyPlus className='size-3 cursor-pointer' onClick={() => setShowImage(!showImage)}/>
+                        <ScrollArea className="w-full whitespace-nowrap rounded-md">
+                            <div className="flex w-max space-x-4 p-4">
+                                {sourceLink.map((metadata : any,idx : number) => (
+                                <figure key={idx} className="shrink-0">
+                                    {metadata.metatags.map((link : any,index : number) => (
+                                    <div key={index} className='flex flex-col gap-1'>
+                                        <div className="overflow-hidden rounded-md">
+                                        
+                                        { link["og:image"] && link["og:title"] ?
+                                        <Link href={`${link["og:url"]}`}>
+                                            <img src={link["og:image"]} alt={link["og:title"]} 
+                                             height={40} 
+                                            className='rounded-md shadow w-24 min-w-20 max-w-32 max-h-12 shadow-neutral-300 aspect-[3/4]  object-cover' />
+                                        </Link> : '' }
 
-                                        <div key={index}>
-                                            <div className='flex gap-6'>
-                                                { link["og:image"] && link["og:title"] ?  <Link href={`${link["og:url"]}`}> <img src={link["og:image"]} alt={link["og:title"]} width={140} height={130} className='rounded-md max-h-[80px] max-w-[90px] shadow shadow-neutral-300 object-cover' ></img> </Link> : '' }
-
-                                                {link["og:image"] && link["og:title"] ? <p><Link href={`${link["og:url"]}`}>{reducetext(link["og:title"],70)}</Link></p> : ''}
-                                            </div>
                                         </div>
+                                        <figcaption className="text-[9px] text-white text-muted-foreground">
+                                            <p className="opacity-85 text-foreground">
+                                            {
+                                            link["og:image"] && link["og:title"] ?
+                                                <span className='text-white'>
+                                                    <Link href={`${link["og:url"]}`}>
+                                                        {reducetext(link["og:title"],30)}
+                                                    </Link>
+                                                </span> : ''}
+                                        </p>
+                                        </figcaption>
+                                    </div>
+                                    ))} 
 
+                                </figure>
                                 ))}
-                                
                             </div>
-                         ))} </div> ) }
+                            <ScrollBar orientation="horizontal" />
+                        </ScrollArea>
+                    </div> : <LucideCopyPlus className='size-3 cursor-pointer' onClick={() => setShowImage(!showImage)}/> }
+                </div>
+
+                <div className='text-xs'>
+                    <div className='pt-4 pl-3 pr-3 pb-2'>
+                    <Markdown text={message} />
                     </div>
                 </div>
+            </div> : "" }
             </div>
 
         </div>
     </div>
   )
 }
-
-{/* <> <div className='bg-black text-white shadow shadow-neutral-300 w-50 h-20 rounded-md flex justify-center items-center text-sm'><p>Image not present.</p></div></> */}

@@ -2,33 +2,33 @@
 .markdown-content {
   font-family: Arial, sans-serif;
   line-height: 2;
-  color: #333;
+  color: white;
   padding: 10px;
-  background-color: #fff;
+  background-color: black;
   border-radius: 8px;
 }
 
 /* Heading styles */
 .markdown-content h1 {
-  font-size: 2rem;
+  font-size: 10px ;
   color: #1a73e8;
   margin-bottom: 10px;
 }
 
 .markdown-content h2 {
-  font-size: 1.75rem;
+  font-size: 10px;
   color: #333;
   margin-bottom: 10px;
 }
 
 .markdown-content h3 {
-  font-size: 1.5rem;
+  font-size: 10px;
   margin-bottom: 8px;
 }
 
 /* Paragraphs */
 .markdown-content p {
-  font-size: 1rem;
+  font-size: 10px;
   margin-bottom: 10px;
 }
 
@@ -70,7 +70,8 @@
 
 .markdown-content code {
   background-color: #f4f4f4;
-  padding: 2px 4px;
+  color: black;
+  padding: 5px 4px;
   border-radius: 3px;
   font-family: monospace;
 }
